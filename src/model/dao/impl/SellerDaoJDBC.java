@@ -44,33 +44,16 @@ public class SellerDaoJDBC implements SellerDao {
 		ResultSet rs = null;
 
 		try {
-//			st = conn.prepareStatement(
-//			"SELECT seller.*,department.Name as DepName " 
-//			+ "FROM seller INNER JOIN department"
-//			+ "ON seller.DepartmentId = department.Id" 
-//			+ "WHERE seller.Id = ?");
-			
-			st = conn.prepareStatement("select *from seller sel\r\n" + 
-					"inner join department dep\r\n" + 
-					"on sel.DepartmentId = dep.Id\r\n" + 
-					"where sel.Id = ? ");
+
+			st = conn.prepareStatement("select *from seller sel\r\n" + "inner join department dep\r\n"
+					+ "on sel.DepartmentId = dep.Id\r\n" + "where sel.Id = ? ");
 
 			st.setInt(1, id);
 			rs = st.executeQuery();
 
 			if (rs.next()) {
-				Departament dep = new Departament();
-				dep.setId(rs.getInt("DepartmentId"));
-				dep.setName(rs.getString("Name"));
-
-				Seller obj = new Seller();
-				obj.setId(rs.getInt("Id"));
-				obj.setName(rs.getString("Name"));
-				obj.setEmail(rs.getString("Email"));
-				obj.setBaseSalary(rs.getDouble("BaseSalary"));
-				obj.setBirthDate(rs.getDate("BirthDate"));
-				obj.setDepartament(dep);
-				
+				Departament dep = instantiateDepartment(rs);
+				Seller obj = instantiateSeller(rs, dep);
 				return obj;
 			}
 			return null;
@@ -81,6 +64,27 @@ public class SellerDaoJDBC implements SellerDao {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
+	}
+
+	private Seller instantiateSeller(ResultSet rs, Departament dep) throws SQLException {
+		Seller obj = new Seller();
+		obj.setId(rs.getInt("Id"));
+		obj.setName(rs.getString("Name"));
+		obj.setEmail(rs.getString("Email"));
+		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setBirthDate(rs.getDate("BirthDate"));
+		obj.setDepartament(dep);
+
+		return obj;
+	}
+
+	private Departament instantiateDepartment(ResultSet rs) throws SQLException {
+
+		Departament dep = new Departament();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("Name"));
+
+		return dep;
 	}
 
 	@Override
